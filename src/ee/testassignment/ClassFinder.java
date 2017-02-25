@@ -50,7 +50,7 @@ public class ClassFinder {
 	
 	/**
 	 * To find the user query (approximate class name) from classes list in file
-	 * this method performs a line by line file parsing an initiates match finding
+	 * this method performs a line by line file parsing and initiates match finding
 	 * @param filePathIn 	File-type 
 	 * @param queryIn		String[]-type approximate class name in camel case
 	 * @return				
@@ -71,8 +71,7 @@ public class ClassFinder {
 		
 		while (input.hasNextLine()) {
 			String currentLine = input.nextLine();
-			
-			if (currentLine.trim().length() > 0) { // exception handling
+			if (currentLine.trim().length() > 0) {
 				classesList.add(prepareNameAsArray(currentLine));
 			}
 		}
@@ -83,10 +82,12 @@ public class ClassFinder {
 
 	/**
 	 * To compare cleaned class names against cleaned user query,
-	 * this method prepares the class name and query on request
+	 * this method prepares the class name or query on request
 	 * as an array of elements 
 	 * e.g. 'CamelCase' -> 'Camel', 'Case' - two elements
 	 * e.g. 'ee.test.CamelCaseZest' -> 'Camel','Case','Zest','ee.test.'
+	 * 										moving package name to end
+	 * 										simplifies matching query and classes
 	 * 
 	 * @param classNameIn	String-type line in file, it is a dirty class name
 	 * @return
@@ -96,11 +97,9 @@ public class ClassFinder {
 		String currentLine = classNameIn.trim();
 		ArrayList<String> currentLineClassElements = new ArrayList<String>();
 	
-		
 		String packageName = null;
 		String className = null;
 		boolean containsPackageName;
-		
 		
 		if (currentLine == null) {
 			throw new Exception("No data on line");
@@ -119,12 +118,14 @@ public class ClassFinder {
 		if (className.equals(className.toLowerCase())) {
 			className = className.toUpperCase();			
 		} 
-		
-		for (int i = 0, m=0; i < className.length(); i++) {
+		for (int i = 0, m = 0; i < className.length(); i++) {
 			if (Character.isUpperCase(className.charAt(i)) 
 					&& i != 0) {
 				currentLineClassElements.add(className.substring(m, i));
 				m = i;
+				if (i+1 == className.length() && Character.isUpperCase(className.charAt(i))) {
+					currentLineClassElements.add(String.valueOf(className.charAt(i)));
+				}
 			} else if (i+1 == className.length()) {
 				currentLineClassElements.add(className.substring(m, i+1));
 			}
@@ -160,18 +161,28 @@ public class ClassFinder {
 		int matchCount = 0;
 		
 		for (String[] classRow : classesList) {
+			
+			// No point in comparing query and current class 
+			// if class has less elements than query, e.g. query: CameCaZest, class: CamelCase
+			if (classRow[classRow.length-1].contains(PACKAGE_EXISTS_IDENTIFIER)) {
+				if ((classRow.length-1) < queryElements.length) {
+					continue;
+				}
+			} else if (classRow.length < queryElements.length) {
+				continue;
+			}
 
 			boolean previousElementsMatch = true; // holds info about class previous elements
 			for (int queryRowElementCount = 0, classRowElementCount = 0
 					; queryRowElementCount < queryElements.length
 					; queryRowElementCount++, classRowElementCount++) {
-				
+								
 				String currentClassElement = classRow[classRowElementCount];
 				String currentQueryElement = queryElements[queryRowElementCount];
 				boolean currentQueryElementContainsWildcard = currentQueryElement.contains(WILDCARD_IDENTIFIER);
 				
 				// No point in looking at current class, 
-				// if class element is shorter than query element
+				// if class element name is shorter than query element, e.g. query: Camel, class: Cam
 				if (currentClassElement.length() < currentQueryElement.trim().length()) {
 					break;
 				}
@@ -189,7 +200,7 @@ public class ClassFinder {
 					 */
 					if (currentQueryElement.trim().equals(currentClassElement)) {
 						if (queryElements.length == (queryRowElementCount+1)) {
-							printMatch(queryRowElementCount, classRowElementCount, classRow);
+							printMatch(classRow);
 							matchCount++;
 							previousElementsMatch = true;
 						} else {
@@ -214,7 +225,7 @@ public class ClassFinder {
 					 * ########################################################
 					*/
 					if (queryElements.length == (queryRowElementCount+1)) {
-						printMatch(queryRowElementCount, classRowElementCount, classRow);
+						printMatch(classRow);
 						matchCount++; // TEMPORARY
 						previousElementsMatch = true;
 						
@@ -247,7 +258,7 @@ public class ClassFinder {
 								}
 								if (currentQueryElement.length() == (elementLetterCount+1) 
 										&& (queryRowElementCount+1) == queryElements.length) {
-									printMatch(queryRowElementCount, classRowElementCount, classRow);
+									printMatch(classRow);
 									matchCount++; //TEMPORARY
 									previousElementsMatch = true;
 									break;
@@ -300,19 +311,14 @@ public class ClassFinder {
 	 * To print out class names with their package (if exists)
 	 * to an initial standard, it rebuilds the initial class name
 	 * for matching classes
-	 * @param queryRowElementCount		int-type query element position
-	 * 										where match was found
-	 * @param classRowElementCount		int-type class element position
-	 * 										where match was found
+	 *
 	 * @param classRow					String[]-type array of matched class elements
 	 */
-	public void printMatch(int queryRowElementCount
-			, int classRowElementCount
-			, String[] classRow) {
+	public void printMatch(String[] classRow) {
 		
 		StringBuilder classNameElements = new StringBuilder();
 		
-		if (queryRowElementCount != classRowElementCount) {
+		if (classRow[classRow.length-1].contains(PACKAGE_EXISTS_IDENTIFIER)) {
 			classNameElements.append(classRow[classRow.length-1]);
 			for (int i = 0; i < classRow.length-1; i++) {
 				classNameElements.append(classRow[i]);

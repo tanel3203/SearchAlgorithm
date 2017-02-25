@@ -1,5 +1,6 @@
 a.b.FooBarBaz
 c.d.FaBar
+Foo
 
 codeborne.FooBarBaz
 codeborne.WishMaker
