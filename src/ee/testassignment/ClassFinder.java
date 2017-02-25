@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class ClassFinder {
-
-	//private static String[] queryItem = new String[]{"B*r","Baz"};
 	
 	private static final String PACKAGE_EXISTS_IDENTIFIER = "."; // to separate classes that are full package names
 	private static final String WILDCARD_IDENTIFIER = "*"; // wildcard to replace one character
@@ -93,8 +91,8 @@ public class ClassFinder {
 	 * @return
 	 * @throws Exception
 	 */
-	public String[] prepareNameAsArray(String classNameIn) throws Exception {
-		String currentLine = classNameIn.trim();
+	public String[] prepareNameAsArray(String nameIn) throws Exception {
+		String currentLine = nameIn.trim();
 		ArrayList<String> currentLineClassElements = new ArrayList<String>();
 	
 		String packageName = null;
