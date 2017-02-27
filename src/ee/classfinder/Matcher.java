@@ -1,7 +1,15 @@
 package ee.classfinder;
 
 public class Matcher {
-
+	
+	private StringBuilder classElements = new StringBuilder();
+	private int classElemCounter = 0;
+	private int queryElemCounter = 0;
+	private int classElemTotal = 0; 
+	private int queryElemTotal = 0;
+	private int matchedElements = 0;
+	private boolean fullElementSearch = false;
+	
 	private static final String WILDCARD_IDENTIFIER = "*"; // wildcard to replace one character
 	private static final String NAME_ENDING_IDENTIFIER = " "; // only accepts spaces as name ending chars
 
@@ -17,48 +25,31 @@ public class Matcher {
 	public boolean findMatches(String[] queryElemsIn, 
 								String[] classElemsIn) {
 
-		StringBuilder classElements = new StringBuilder();
-		int classElemCounter = 0;
-		int queryElemCounter = 0;
-		int classElemTotal = classElemsIn.length - 1; // ignore package, last element
-		int queryElemTotal = queryElemsIn.length - 1; // ignore package, last element
-		int matchedElements = 0;
-		boolean fullElementSearch = false;
+		classElemTotal = classElemsIn.length - 1; // ignore package, last element
+		queryElemTotal = queryElemsIn.length - 1; // ignore package, last element
 		
 		
 		for (String classElem : classElemsIn) {
-			if (classElem == null) { 							// no match found
-				return false; 		
-			}
 			
-			if ((classElemTotal-1) - classElemCounter 			
-					< (queryElemTotal-1) - queryElemCounter) { 	//  no match found
-				return false;									
-			}
-			
-			if ((classElemTotal-1) < classElemCounter 
-					&& classElemTotal > queryElemTotal) {		// no match found
+			if (classCantBeMatched(classElem)) {
 				return false;
 			}
 			
 			for (; queryElemCounter < queryElemTotal ;) {
-				fullElementSearch = queryElemsIn[queryElemCounter]
-											.substring(queryElemsIn[queryElemCounter]
-														.length()-1)
-											.equals(NAME_ENDING_IDENTIFIER);
+				fullElementSearch = 
+						queryElemsIn[queryElemCounter]
+								.substring(queryElemsIn[queryElemCounter]
+															.length()-1)
+								.equals(NAME_ENDING_IDENTIFIER);
 
-
-				if ((queryElemTotal-1) <= queryElemCounter 
-						&& queryElemTotal > classElemTotal) {		// no match found
+				if (queryCantBeMatched(queryElemsIn[queryElemCounter])) {
 					return false;
 				}
+
 				
-				if (queryElemsIn[queryElemCounter].length() <= 0) {	// no match found
-					return false;
-				}
-				if (fullElementSearch 
-						? elementsMatchInFull(classElem,queryElemsIn[queryElemCounter]) 
-								: elementsMatch(classElem,queryElemsIn[queryElemCounter])) {
+				if (elementMatchIsFound(fullElementSearch
+										, classElem
+										, queryElemsIn[queryElemCounter])) {
 					++queryElemCounter;
 					++matchedElements;
 					break; // compare next query element against next class element
@@ -73,9 +64,7 @@ public class Matcher {
 			classElements.append(classElem);
 			
 			if (matchedElements == queryElemTotal) {
-				if (fullElementSearch 
-					&& (classElemsIn.length-1) > (classElemCounter+1)
-					) {
+				if (fullQueryDoesntMatchWith(classElemsIn.length)) {
 					return false;	// no match found
 				}
 				return true;	// all query elements exist in the class elements
@@ -83,6 +72,97 @@ public class Matcher {
 			++classElemCounter;
 		}
 		return false;
+	}
+	
+	/**
+	 * Before resulting in a match between query and class
+	 * this method checks whether query requires full element 
+	 * match, and if class doesn't satisfy it, then returns false
+	 * 
+	 * @param classElemsLength		class elements length count
+	 * @return
+	 */
+	
+	private boolean fullQueryDoesntMatchWith(int classElemsLength) {
+		
+		boolean noMatch = false;
+		
+		if (fullElementSearch 
+				&& (classElemsLength-1) > (classElemCounter+1)
+				) {
+			noMatch = true;
+		}
+		
+		return noMatch;
+	}
+	
+	/**
+	 * Check whether elements match
+	 * 
+	 * @param fullElementSearch	boolean-type whether full element is searched
+	 * @param classElem			String-type current class element
+	 * @param queryElem			String-type current query element
+	 * @return
+	 */
+	private boolean elementMatchIsFound(boolean fullElementSearch, String classElem, String queryElem) {
+		
+		boolean noMatch = false;
+		
+		if (fullElementSearch 
+				? elementsMatchInFull(classElem,queryElem) 
+						: elementsMatch(classElem,queryElem)) {
+			noMatch = true;
+		}
+		return noMatch;
+	}
+	
+	/**
+	 * Basic check whether obvious no matches can be ignored
+	 * @param classElem		class element to be checked 
+	 * 						(e.g. 'Camel' in 'CamelCase')
+	 * @return
+	 */
+	private boolean classCantBeMatched(String classElem) {
+
+		boolean noMatch = false;
+		
+		if (classElem == null) { 							// no match found
+			noMatch = true;		
+		}
+		
+		if ((classElemTotal-1) - classElemCounter 			
+				< (queryElemTotal-1) - queryElemCounter) { 	//  no match found
+			noMatch = true;								
+		}
+		
+		if ((classElemTotal-1) < classElemCounter 
+				&& classElemTotal > queryElemTotal) {		// no match found
+			noMatch = true;
+		}
+		
+		return noMatch;
+	}
+	
+	/**
+	 * Basic check whether obvious no matches can be ignored
+	 * @param queryElem		query element to be checked 
+	 * 						(e.g. 'Camel' in 'CamelCase')
+	 * @return
+	 */
+	private boolean queryCantBeMatched(String queryElem) {
+		
+		boolean noMatch = false;
+		
+		if ((queryElemTotal-1) <= queryElemCounter 
+				&& queryElemTotal > classElemTotal) {		// no match found
+			noMatch = true;
+		}
+		
+		if (queryElem.length() <= 0) {						// no match found
+			noMatch = true;
+		}
+		
+		return noMatch;
 	}
 	
 	/**

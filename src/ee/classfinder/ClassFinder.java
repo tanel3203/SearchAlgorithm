@@ -20,7 +20,8 @@ public class ClassFinder {
 		boolean queryMatchesClassInFile = false;
 		String line = null;
 		String[] lineElements;
-		String[] queryElements = new Cleaner().prepareNameAsArray(args[1], false);
+		String[] queryElements = 
+				new Cleaner().prepareNameAsArray(args[1], false);
 
 		while ((line = reader.readLine()) != null) {
 			lineElements = new Cleaner()
