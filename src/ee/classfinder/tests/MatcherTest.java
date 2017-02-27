@@ -1,9 +1,7 @@
 package ee.classfinder.tests;
 
 import static org.junit.Assert.*;
-
 import org.junit.Test;
-
 import ee.classfinder.Matcher;
 
 public class MatcherTest {
