@@ -173,8 +173,6 @@ public class Matcher {
 			}
 			return true;
 		}
-		
-		
 		return false;
 	}
 }

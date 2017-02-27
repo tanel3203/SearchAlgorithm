@@ -57,7 +57,7 @@ public class MatcherTest {
 	
 	@Test
 	public void testOneToOneNoMatch() {
-		String[] queryElems = {"Foo", "B* ", "codeborne."};
+		String[] queryElems = {"Foo", "Ba ", "codeborne."};
 		String[] classElems = {"Foo", "Bar", "a.b."};
 
 		assertFalse(matcher.findMatches(queryElems, classElems));
