@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import ee.classfinder.Cleaner;
 
-public class CleanerTests {
+public class CleanerTest {
 	
 	Cleaner cleaner = new Cleaner();
 	
