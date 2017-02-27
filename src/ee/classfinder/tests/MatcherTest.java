@@ -48,9 +48,26 @@ public class MatcherTest {
 	}
 	
 	@Test
-	public void testOneToOneNotMatch() {
-		String[] queryElems = {"Foo", "Ba ", "codeborne."};
+	public void testOneToOneNoMatchWithMultiAsterisk() {
+		String[] queryElems = {"F*a", "B**", "codeborne."};
 		String[] classElems = {"Foo", "Bar", "a.b."};
+
+		assertFalse(matcher.findMatches(queryElems, classElems));
+	}
+	
+	@Test
+	public void testOneToOneNoMatch() {
+		String[] queryElems = {"Foo", "B* ", "codeborne."};
+		String[] classElems = {"Foo", "Bar", "a.b."};
+
+		assertFalse(matcher.findMatches(queryElems, classElems));
+	}
+	
+	
+	@Test
+	public void testOneToOneNoMatchReverse() {
+		String[] queryElems = {"Foo", "Bar", "codeborne."};
+		String[] classElems = {"Foo", "Ba", "a.b."};
 
 		assertFalse(matcher.findMatches(queryElems, classElems));
 	}
@@ -61,6 +78,14 @@ public class MatcherTest {
 		String[] classElems = {"Foo", "Bar", "a.b."};
 
 		assertTrue(matcher.findMatches(queryElems, classElems));
+	}
+	
+	@Test
+	public void testOneToOnePartialNoMatch() {
+		String[] queryElems = {"Fa", "Ba", "codeborne."};
+		String[] classElems = {"Foo", "Bar", "a.b."};
+
+		assertFalse(matcher.findMatches(queryElems, classElems));
 	}
 	
 	@Test

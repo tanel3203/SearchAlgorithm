@@ -56,13 +56,13 @@ public class Matcher {
 				if (queryElemsIn[queryElemCounter].length() <= 0) {	// no match found
 					return false;
 				}
-				
-				if (elementsMatch(classElem
-									, queryElemsIn[queryElemCounter]
-									, fullElementSearch)) {
+				if (fullElementSearch 
+						? elementsMatchInFull(classElem,queryElemsIn[queryElemCounter]) 
+								: elementsMatch(classElem,queryElemsIn[queryElemCounter])) {
 					++queryElemCounter;
 					++matchedElements;
 					break; // compare next query element against next class element
+					
 				} else {
 					if (queryElemCounter > 0) { // no match found, e.g. q:"FooBaz"
 						return false;			// and class: "FooBarBaz"
@@ -95,20 +95,13 @@ public class Matcher {
 	 * @return
 	 */
 	private boolean elementsMatch(String classElem
-									, String queryElem
-									, boolean fullElementSearch) {
+									, String queryElem) {
 		 
 		if (classElem.length() < queryElem.trim().length()) { // class is shorter than query
 			return false;
 		} else if (classElem.startsWith(queryElem.trim())) { // beginnings match
-
-			if (!fullElementSearch) {
-				return true;
-			}
+			return true;
 			
-			if (fullElementSearch && classElem.equals(queryElem.trim())) {
-				return true;
-			}
 		} else if (queryElem
 					.trim()
 					.contains(WILDCARD_IDENTIFIER)) { // query has wildcard
@@ -126,19 +119,62 @@ public class Matcher {
 								.substring(i, i+1)
 								.equals(WILDCARD_IDENTIFIER)) { //no match
 
-					if (!fullElementSearch) {
-						return false;
-					}
+					return false;
+					
 				}
 			}
 			return true;
 		}
 		
-		if (fullElementSearch) {
-			if (classElem.equals(queryElem)) {
+		return false;
+	}
+	
+
+	/**
+	 * To see whether an element in class file
+	 * matches with user query in full 
+	 * 			(e.g. 'CaCase ' matches 'CamelCase', not 'CamelCaseZest')
+	 * this method performs the checks and returns true or false
+	 * 
+	 * @param classElem		String-type class element from file
+	 * @param queryElem		String-type query element from user request
+	 * @return
+	 */
+	private boolean elementsMatchInFull(String classElem
+									, String queryElem) {
+		 
+		boolean queryContainsWildcard = queryElem
+										.trim()
+										.contains(WILDCARD_IDENTIFIER);
+		
+		
+		if (!queryContainsWildcard) { 
+			if (classElem.equals(queryElem.trim())) {
 				return true;
-			} 
+			}
+		} else if (queryContainsWildcard 
+				&& queryElem.trim().length() == classElem.length()) {
+
+			for (int i = 0
+					; i < queryElem.trim().length()
+					; i++) {	// letter-by-letter search
+				
+				if ((queryElem
+							.trim()
+							.charAt(i) != classElem
+												.charAt(i)) 
+						&& !queryElem
+								.trim()
+								.substring(i, i+1)
+								.equals(WILDCARD_IDENTIFIER)) { 
+					return false; //no match
+					
+				}
+			}
+			return true;
 		}
+		
+		
 		return false;
 	}
 }
