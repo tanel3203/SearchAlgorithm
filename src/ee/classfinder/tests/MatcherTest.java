@@ -42,6 +42,14 @@ public class MatcherTest {
 	}
 	
 	@Test
+	public void testOneToOneMatchWithMultiAsterisk() {
+		String[] queryElems = {"F*o", "B**", "codeborne."};
+		String[] classElems = {"Foo", "Bar", "a.b."};
+
+		assertTrue(matcher.findMatches(queryElems, classElems));
+	}
+	
+	@Test
 	public void testOneToOneNotMatch() {
 		String[] queryElems = {"Foo", "Ba ", "codeborne."};
 		String[] classElems = {"Foo", "Bar", "a.b."};
