@@ -84,8 +84,8 @@ public class ClassFinder {
 	 * as an array of elements 
 	 * e.g. 'CamelCase' -> 'Camel', 'Case' - two elements
 	 * e.g. 'ee.test.CamelCaseZest' -> 'Camel','Case','Zest','ee.test.'
-	 * 										moving package name to end
-	 * 										simplifies matching query and classes
+	 * 									moving package name to end
+	 * 									simplifies matching query and classes
 	 * 
 	 * @param classNameIn	String-type line in file, it is a dirty class name
 	 * @return
@@ -141,8 +141,8 @@ public class ClassFinder {
 	 * To find matching classes from file
 	 * this method implements the chosen algorithm for searching
 	 * 
-	 * @param queryElemsIn		String[]-type prepared query 
-	 * @param classesListIn		ArrayList<String[]>-type prepared classes list
+	 * @param queryElemsIn	String[]-type prepared query 
+	 * @param classesListIn	ArrayList<String[]>-type prepared classes list
 	 * @return
 	 * @throws Exception
 	 */
@@ -310,7 +310,7 @@ public class ClassFinder {
 	 * to an initial standard, it rebuilds the initial class name
 	 * for matching classes
 	 *
-	 * @param classRow					String[]-type array of matched class elements
+	 * @param classRow	String[]-type array of matched class elements
 	 */
 	public void printMatch(String[] classRow) {
 		
